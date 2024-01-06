@@ -4,11 +4,12 @@ import numpy as np
 
 from common.get_data import *
 from indicators.moving_average import *
+from indicators.trend_indicators import *
 
 vw = yf.Ticker('VWAGY')
-vw_hist = vw.history(period='3y')
+vw_hist = vw.history(period='4y')
 tesla = yf.Ticker('TSLA')
-tesla_hist = tesla.history(period='3y')
+tesla_hist = tesla.history(period='4y')
 
 df = get_last_years(years=4, company='VWAGY')
 
@@ -16,6 +17,7 @@ add_sma(df=df, window_size=50)
 add_sma(df=df, window_size=200)
 add_ema(df=df, n_smooth=10)
 add_wma(df=df, window_size=5)
+add_adx(df=df, n_smooth=14)
 
 
 ### Plot
