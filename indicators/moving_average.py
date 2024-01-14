@@ -13,7 +13,7 @@ def add_sma(df: pd.core.frame.DataFrame, window_size: int) :
 
 
 def add_ema(df: pd.core.frame.DataFrame, n_smooth: int, refcol: str = 'Close', colname: str = None) :
-    """Add EMA to DataFrame
+    """Add Exponential Moving Average (EMA) to DataFrame
     SF (Smoothing Factor) = 2/ (n_smooth + 1)
     EMA(t) = C(t) * SF + (1 - SF) * EMA(t-1)
     refcol: Reference that is used for EMA calculation (column of df).

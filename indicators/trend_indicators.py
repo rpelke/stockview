@@ -5,7 +5,7 @@ from indicators.moving_average import *
 
 
 def add_macd(df: pd.core.frame.DataFrame, fast: int = 12, slow: int = 26) :
-    """The MACD (Moving Average Convergence/Divergence) indicator is a trend-following tool in market analysis.
+    """The Moving Average Convergence/Divergence (MACD) indicator is a trend-following tool in market analysis.
     It calculates the difference between two exponential moving averages and is often used with a signal line (trigger line) for analysis.
     MACD(default) = EMA(12)-EMA(26).
     The signal line is a 9-period EMA of the MACD.
