@@ -12,19 +12,23 @@ def add_sma(df: pd.core.frame.DataFrame, window_size: int) :
     df[f'SMA{window_size}'] = df['Close'].rolling(window=window_size, min_periods=window_size).mean()
 
 
-def add_ema(df: pd.core.frame.DataFrame, n_smooth: int) :
+def add_ema(df: pd.core.frame.DataFrame, n_smooth: int, refcol: str = 'Close', colname: str = None) :
     """Add EMA to DataFrame
     SF (Smoothing Factor) = 2/ (n_smooth + 1)
     EMA(t) = C(t) * SF + (1 - SF) * EMA(t-1)
+    refcol: Reference that is used for EMA calculation (column of df).
     """
     sf = 2 / (n_smooth + 1)
+    
+    if colname == None :
+        colname = f'EMA{n_smooth}'
 
     ema = pd.Series(0.0, index=df.index)
-    ema.iloc[0] = df.iloc[0]['Close']
+    ema.iloc[0] = df.iloc[0][refcol]
     for i in range(1, len(df)):
-        ema.iloc[i] = df.iloc[i]['Close'] * sf + (1 - sf) * ema.iloc[i-1]
+        ema.iloc[i] = df.iloc[i][refcol] * sf + (1 - sf) * ema.iloc[i-1]
     
-    df[f'EMA{n_smooth}'] = ema
+    df[colname] = ema
 
 
 def add_wma(df: pd.core.frame.DataFrame, window_size: int) :
@@ -49,10 +53,10 @@ def plot_average(path: str, df: pd.core.frame.DataFrame, company: str, indicator
     plt.figure(figsize=(15,5))
     plt.title(f'Moving average indicator(s) for company {company}')
 
-    plt.plot(df.index, df['High'], label=f'{company} Chart (High)', linewidth=0.5, linestyle='--')
+    plt.bar(x=df.index, height=df['High']-df['Low'], bottom=df['Low'], color='blue', label=f'{company} Chart')
     
     for indicator in indicators :
-        plt.plot(df.index, df[indicator], label=f'{indicator}', linewidth=1)
+        plt.plot(df.index, df[indicator], label=f'{indicator}', linewidth=0.5)
 
     plt.legend(loc='upper left')
     plt.tight_layout()

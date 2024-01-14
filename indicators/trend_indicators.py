@@ -1,6 +1,62 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from indicators.moving_average import *
+
+
+def add_macd(df: pd.core.frame.DataFrame, fast: int = 12, slow: int = 26) :
+    """The MACD (Moving Average Convergence/Divergence) indicator is a trend-following tool in market analysis.
+    It calculates the difference between two exponential moving averages and is often used with a signal line (trigger line) for analysis.
+    MACD(default) = EMA(12)-EMA(26).
+    The signal line is a 9-period EMA of the MACD.
+    """
+    if not f'EMA{fast}' in df.columns :
+        add_ema(df=df, n_smooth=fast)
+    if not f'EMA{slow}' in df.columns :
+        add_ema(df=df, n_smooth=slow)
+
+    col = f'MACD{fast}-{slow}'
+    df[col] = df[f'EMA{fast}'] - df[f'EMA{slow}']
+    
+    add_ema(df=df, n_smooth=9, refcol=col, colname=f'{col}-trigger-{9}')
+
+
+def plot_macd(path: str, df: pd.core.frame.DataFrame, company: str, fast: int = 12, slow: int = 26) :
+    """Plot MACD for one company.
+    Both the signal line and MACD are represented as lines in a two-line model.
+    A rising MACD indicates an uptrend, while a falling MACD indicates a downtrend.
+    A buying signal occurs when the MACD crosses its signal line from below.
+    A selling signal occurs when the MACD crosses its signal line from above.
+    The distance of the MACD from its centerline signals the strength of the trend.
+    Increasing distance indicates stronger trends.
+    A very large distance may suggest overbought/oversold conditions, potentially leading to trend reversals.
+    If the gap between the signal line and the MACD widens, the trend strengthens; if it narrows, the trend weakens.
+    Divergences between the MACD and its base (price series on which the MACD is calculated) can be interpreted as a possible signal for an impending trend reversal.
+    """    
+    fig, axs = plt.subplots(2, figsize=(15,5))
+    fig.suptitle(f'MACD{fast}-{slow} for company {company}')
+
+    axs[0].bar(x=df.index, height=df['High']-df['Low'], bottom=df['Low'], color='blue', label=f'{company} Chart')
+    
+    axs[1].axhline(y=0, color='grey', linewidth=0.2, linestyle='--')
+    axs[1].plot(df.index, df[f'MACD{fast}-{slow}'], label=f'MACD{fast}-{slow}', color='blue', linewidth=0.5)
+    axs[1].plot(df.index, df[f'MACD{fast}-{slow}-trigger-{9}'], label=f'MACD{fast}-{slow}-trigger-{9}', color='red', linewidth=0.5)
+    
+    tmp_df = pd.DataFrame(index=df.index)
+    tmp_df['diff_pos'] = df.apply(lambda row: row[f'MACD{fast}-{slow}'] - row[f'MACD{fast}-{slow}-trigger-{9}'] if row[f'MACD{fast}-{slow}'] - row[f'MACD{fast}-{slow}-trigger-{9}'] > 0 else 0, axis=1)
+    tmp_df['diff_neg'] = df.apply(lambda row: row[f'MACD{fast}-{slow}'] - row[f'MACD{fast}-{slow}-trigger-{9}'] if row[f'MACD{fast}-{slow}'] - row[f'MACD{fast}-{slow}-trigger-{9}'] < 0 else 0, axis=1)
+    axs[1].bar(x=df.index, height=tmp_df['diff_pos'], color='blue', label=f'Positive diff')
+    axs[1].bar(x=df.index, height=tmp_df['diff_neg'], color='orange', label=f'Negative diff')
+
+    axs[0].set_xlim(left=df.index.min(), right=df.index.max())
+    axs[1].set_xlim(left=df.index.min(), right=df.index.max())
+
+    axs[0].legend(loc='upper left')
+    axs[1].legend(loc='upper left')
+
+    plt.tight_layout()
+    plt.savefig(f'{path}/MACD{fast}-{slow}_{company}.pdf')
+
 
 def add_adx(df: pd.core.frame.DataFrame, n_smooth: int = 14) :
     """The Average Directional Index (ADX) signals market direction, trend presence, and momentum.
@@ -87,7 +143,7 @@ def plot_adx(path: str, df: pd.core.frame.DataFrame, company: str, adx_num: int 
             axs[0].axvline(x=day, color='red', linestyle='--', linewidth=0.5)
             axs[1].axvline(x=day, color='red', linestyle='--', linewidth=0.5)
 
-    axs[0].plot(df.index, df['High'], label=f'{company} Chart (High)', color='blue', linewidth=1)
+    axs[0].bar(x=df.index, height=df['High']-df['Low'], bottom=df['Low'], color='blue', label=f'{company} Chart')
 
     axs[1].axhline(y=week_trend, color='grey', linestyle='--', linewidth=0.5)
     axs[1].axhline(y=strong_trend, color='grey', linestyle='--', linewidth=0.5)
