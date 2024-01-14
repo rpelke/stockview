@@ -77,7 +77,7 @@ def plot_adx(path: str, df: pd.core.frame.DataFrame, company: str, adx_num: int 
     tmp_df['crossover'] = tmp_df['diff'] - tmp_df['diff'].shift(1)
 
     fig, axs = plt.subplots(2, figsize=(15,5))
-    fig.suptitle(f'ADX{adx_num} for Company {company}')
+    fig.suptitle(f'ADX{adx_num} for company {company}')
     for day in list(tmp_df.loc[tmp_df['crossover'] == 1].index) :
         if df.loc[day][f'ADX{adx_num}'] > strong_trend :
             axs[0].axvline(x=day, color='green', linestyle='--', linewidth=0.5)
@@ -87,7 +87,7 @@ def plot_adx(path: str, df: pd.core.frame.DataFrame, company: str, adx_num: int 
             axs[0].axvline(x=day, color='red', linestyle='--', linewidth=0.5)
             axs[1].axvline(x=day, color='red', linestyle='--', linewidth=0.5)
 
-    axs[0].plot(df.index, df['High'], label=f'{company} High', color='blue', linewidth=1)
+    axs[0].plot(df.index, df['High'], label=f'{company} Chart (High)', color='blue', linewidth=1)
 
     axs[1].axhline(y=week_trend, color='grey', linestyle='--', linewidth=0.5)
     axs[1].axhline(y=strong_trend, color='grey', linestyle='--', linewidth=0.5)
@@ -98,6 +98,7 @@ def plot_adx(path: str, df: pd.core.frame.DataFrame, company: str, adx_num: int 
     axs[0].set_xlim(left=df.index.min(), right=df.index.max())
     axs[1].set_xlim(left=df.index.min(), right=df.index.max())
 
-    plt.legend()
+    axs[0].legend(loc='upper left')
+    axs[1].legend(loc='upper left')
     plt.tight_layout()
     plt.savefig(f'{path}/ADX{adx_num}_{company}.pdf')

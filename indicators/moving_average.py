@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as np
+import matplotlib.pyplot as plt
 
 
 def add_sma(df: pd.core.frame.DataFrame, window_size: int) :
@@ -41,3 +41,19 @@ def add_wma(df: pd.core.frame.DataFrame, window_size: int) :
         return sum(window * range(1, wz)) / sum(range(1, wz))
     
     df[f'WMA{window_size}'] = df['Close'].rolling(window=window_size, min_periods=window_size).apply(_rolling_multiply, raw=True)
+
+
+def plot_average(path: str, df: pd.core.frame.DataFrame, company: str, indicators: list[str]) :
+    """Plot moving average indicators for one company.
+    """
+    plt.figure(figsize=(15,5))
+    plt.title(f'Moving average indicator(s) for company {company}')
+
+    plt.plot(df.index, df['High'], label=f'{company} Chart (High)', linewidth=0.5, linestyle='--')
+    
+    for indicator in indicators :
+        plt.plot(df.index, df[indicator], label=f'{indicator}', linewidth=1)
+
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig(f'{path}/MovingAverageIndicators_{company}.pdf')
