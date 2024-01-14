@@ -20,9 +20,9 @@ def add_ema(df: pd.core.frame.DataFrame, n_smooth: int) :
     sf = 2 / (n_smooth + 1)
 
     ema = pd.Series(0.0, index=df.index)
-    ema[0] = df.iloc[0]['Close']
+    ema.iloc[0] = df.iloc[0]['Close']
     for i in range(1, len(df)):
-        ema[i] = df.iloc[i]['Close'] * sf + (1 - sf) * ema[i-1]
+        ema.iloc[i] = df.iloc[i]['Close'] * sf + (1 - sf) * ema.iloc[i-1]
     
     df[f'EMA{n_smooth}'] = ema
 

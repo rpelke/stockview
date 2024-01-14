@@ -4,7 +4,9 @@ import pandas as pd
 
 def get_comp_stock_hist(company: str, period: str) -> pd.core.frame.DataFrame :
     yf_comp = yf.Ticker(company)
-    return yf_comp.history(period=period)
+    df = yf_comp.history(period=period)
+    assert not df.empty, "Fetching data not successful. Try again."
+    return df
 
 
 def get_last_years(years: int, company: str) -> pd.core.frame.DataFrame :
