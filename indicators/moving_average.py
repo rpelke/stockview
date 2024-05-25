@@ -58,6 +58,7 @@ def plot_average(path: str, df: pd.core.frame.DataFrame, company: str, indicator
     for indicator in indicators :
         plt.plot(df.index, df[indicator], label=f'{indicator}', linewidth=0.5)
 
+    plt.xlim(left=df.index.min(), right=df.index.max())
     plt.legend(loc='upper left')
     plt.tight_layout()
     plt.savefig(f'{path}/MovingAverageIndicators_{company}.pdf')
