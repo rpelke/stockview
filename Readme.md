@@ -13,10 +13,15 @@ The following indicators are already implemented:
     - Average Directional Index (ADX)
     - Moving Average Convergence/Divergence (MACD)
 
-1. **Price Channels:** 
+1. **Price channels:** 
     - Bollinger Bands
     - Donchian Channel
+    - Keltner Channel
 
+COMING SOON:
+    - Stochastic-Oszillator (oszillator)
+    - Relative Strength Index (oszillator)
+    - Commodity Channel Index (oszillator)
 
 ----
 ## Getting started
@@ -38,3 +43,4 @@ python stockview.py
 ![](docs/MACD12-26_VW.png?raw=true)
 ![](docs/BollingerBands_VW.png?raw=true)
 ![](docs/DonchianChannel_VW.png?raw=true)
+![](docs/KeltnerChannel_VW.png?raw=true)

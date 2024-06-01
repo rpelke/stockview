@@ -4,6 +4,42 @@ import matplotlib.pyplot as plt
 from indicators.moving_average import *
 
 
+def add_true_range_one(df: pd.core.frame.DataFrame) :
+    """True Range (TR): High True Range indicates high volatility.
+    Low values are typical during consolidation phases and when markets reach a top.
+    When the True Range is very high, in other words, when the indicator spikes, it can mean the market has hit its bottom and a trend reversal is likely in the near future.
+    Conversely, low indicator values suggest a sideways trend with low volatility.
+    """
+    if not f'TR{1}' in df.columns :
+        temp_df = pd.DataFrame(index=df.index)
+        temp_df['Th_Tl'] = df['High'] - df['Low']
+        temp_df['Th_Yc'] = df['High'] - df['Close'].shift(1)
+        temp_df['Tl_Yc'] = df['Low'] - df['Close'].shift(1)
+        df['TR1'] = temp_df.iloc[1:].apply(lambda row: max(row['Th_Tl'], abs(row['Th_Yc']), abs(row['Tl_Yc'])), axis=1)
+
+
+def add_true_range(df: pd.core.frame.DataFrame, tr_factor: int = 14) :
+    """True Range (TR)
+    First TR: Sum of first tr_factor TR1
+    Subsequent TR = Prior TR - (Prior TR/tr_factor) + Current TR1
+    """
+    if not f'TR{tr_factor}' in df.columns :
+        add_true_range_one(df)
+        tr = pd.Series(float("NaN"), index=df.index)
+        tr.iloc[tr_factor] = df['TR1'][1:(tr_factor + 1)].sum()
+        for i in range((tr_factor + 1), len(df)):
+            tr.iloc[i] = tr.iloc[i-1] - tr.iloc[i-1]/tr_factor + df.iloc[i]['TR1']
+        df[f'TR{tr_factor}'] = tr
+
+
+def add_average_true_range(df: pd.core.frame.DataFrame, window_size: int = 20) :
+    """Average True Range (ATR)
+    """
+    if not f'ATR{window_size}' in df.columns :
+        add_true_range_one(df)
+        df[f'ATR{window_size}'] = df['TR1'].rolling(window=window_size, min_periods=window_size).mean()
+
+
 def add_macd(df: pd.core.frame.DataFrame, fast: int = 12, slow: int = 26) :
     """The Moving Average Convergence/Divergence (MACD) indicator is a trend-following tool in market analysis.
     It calculates the difference between two exponential moving averages and is often used with a signal line (trigger line) for analysis.
@@ -79,18 +115,10 @@ def add_adx(df: pd.core.frame.DataFrame, n_smooth: int = 14) :
     df['DMminus'] = temp_df.iloc[1:].apply(lambda row: row['DownMove'] if row['DownMove'] > row['UpMove'] and row['DownMove'] > 0 else 0.0, axis=1)
 
     # Calculate True Range (TR)
-    temp_df['Th_Tl'] = df['High'] - df['Low']
-    temp_df['Th_Yc'] = df['High'] - df['Close'].shift(1)
-    temp_df['Tl_Yc'] = df['Low'] - df['Close'].shift(1)
-    df['TR1'] = temp_df.iloc[1:].apply(lambda row: max(row['Th_Tl'], abs(row['Th_Yc']), abs(row['Tl_Yc'])), axis=1)
+    add_true_range_one(df)
     
-    # First TR14: Sum of first 14 TR1
-    # Subsequent TR14 = Prior TR14 - (Prior TR14/14) + Current TR1
-    tr14 = pd.Series(float("NaN"), index=df.index)
-    tr14.iloc[14] = df['TR1'][1:15].sum()
-    for i in range(15, len(df)):
-        tr14.iloc[i] = tr14.iloc[i-1] - tr14.iloc[i-1]/14 + df.iloc[i]['TR1']
-    df['TR14'] = tr14
+    # Calcuate TR 14
+    add_true_range(df, 14)
 
     # Calculate DM14plus and DM14minus
     dm14minus = pd.Series(float("NaN"), index=df.index)
